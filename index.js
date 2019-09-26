@@ -67,6 +67,10 @@ export default {
     }
 
     return RNBoundary.remove(id);
+  },
+
+  setUpLocationManager: () => {
+    return RNBoundary.setUpLocationManager();
   }
 }
 

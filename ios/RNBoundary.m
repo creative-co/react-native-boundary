@@ -9,15 +9,20 @@ RCT_EXPORT_MODULE()
 -(instancetype)init
 {
     self = [super init];
-    if (self) {
-        self.locationManager = [[CLLocationManager alloc] init];
-        self.locationManager.delegate = self;
-        self.locationManager.allowsBackgroundLocationUpdates = YES;
-        os_log(OS_LOG_DEFAULT, "DBG: RNBoundary init");
-    }
-
     return self;
 }
+
+RCT_EXPORT_METHOD(setUpLocationManager)
+{
+    dispatch_async(dispatch_get_main_queue(), ^{
+        if (self.locationManager == nil) {                    
+            self.locationManager = [[CLLocationManager alloc] init];
+            self.locationManager.delegate = self;
+            self.locationManager.allowsBackgroundLocationUpdates = YES;
+        }
+    });
+}
+
 
 RCT_EXPORT_METHOD(add:(NSDictionary*)boundary addWithResolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject)
 {
@@ -86,14 +91,12 @@ RCT_EXPORT_METHOD(removeAll:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromise
 - (void)locationManager:(CLLocationManager *)manager didEnterRegion:(CLRegion *)region
 {
     NSLog(@"didEnter : %@", region);
-    os_log(OS_LOG_DEFAULT, "DBG: boundary didEnterRegion");
     [self sendEventWithName:@"onEnter" body:region.identifier];
 }
 
 - (void)locationManager:(CLLocationManager *)manager didExitRegion:(CLRegion *)region
 {
     NSLog(@"didExit : %@", region);
-    os_log(OS_LOG_DEFAULT, "DBG: boundary didExitRegion");
     [self sendEventWithName:@"onExit" body:region.identifier];
 }
 
