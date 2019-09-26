@@ -18,6 +18,7 @@ export interface BoundaryStatic {
     add: (boundary: Boundary) => Promise<string>;
     remove: (id: string) => Promise<null>;
     removeAll: () => Promise<null>;
+    setUpLocationManager: () => void;
 }
 
 declare let Boundary: BoundaryStatic;
