@@ -106,7 +106,7 @@ RCT_EXPORT_METHOD(requestStateForRegion:(NSDictionary*)boundary addWithResolver:
 
 - (NSArray<NSString *> *)supportedEvents
 {
-    return @[@"onEnter", @"onExit"];
+    return @[@"onEnter", @"onExit", @"onDetermineState"];
 }
 
 - (void)locationManager:(CLLocationManager *)manager didEnterRegion:(CLRegion *)region
