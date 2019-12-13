@@ -9,6 +9,7 @@ const boundaryEventEmitter = new NativeEventEmitter(RNBoundary);
 const Events = {
   EXIT: "onExit",
   ENTER: "onEnter",
+  DETERMINED_STATE: "onDetermineState"
 };
 
 export {
@@ -67,6 +68,25 @@ export default {
     }
 
     return RNBoundary.remove(id);
+  },
+
+  requestStateForRegion: boundary => {
+    if (!boundary || (boundary.constructor !== Array && typeof boundary !== 'object')) {
+      throw TAG + ': a boundary must be an array or non-null object';
+    }
+    return new Promise((resolve, reject) => {
+      if (typeof boundary === 'object' && !boundary.id) {
+        reject(TAG + ': an id is required')
+      }
+
+      RNBoundary.requestStateForRegion(boundary)
+        .then(id => resolve(id))
+        .catch(e => reject(e))
+    })
+  },
+
+  setUpLocationManager: () => {
+    return RNBoundary.setUpLocationManager();
   }
 }
 

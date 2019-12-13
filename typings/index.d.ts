@@ -3,6 +3,7 @@ import {EmitterSubscription} from 'react-native';
 export enum Events {
     EXIT = 'onExit',
     ENTER = 'onEnter',
+    DETERMINED_STATE = 'onDetermineState'
 }
 
 export interface Boundary {
@@ -18,6 +19,8 @@ export interface BoundaryStatic {
     add: (boundary: Boundary) => Promise<string>;
     remove: (id: string) => Promise<null>;
     removeAll: () => Promise<null>;
+    requestStateForRegion: (boundary: Boundary) => Promise<string>;
+    setUpLocationManager: () => void;
 }
 
 declare let Boundary: BoundaryStatic;
