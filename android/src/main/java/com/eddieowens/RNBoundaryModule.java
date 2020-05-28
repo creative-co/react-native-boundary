@@ -4,8 +4,6 @@ import android.Manifest;
 import android.app.PendingIntent;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import androidx.annotation.NonNull;
-import androidx.core.app.ActivityCompat;
 import android.util.Log;
 
 import com.eddieowens.receivers.BoundaryEventBroadcastReceiver;
@@ -29,6 +27,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import androidx.annotation.NonNull;
+import androidx.core.app.ActivityCompat;
+
 public class RNBoundaryModule extends ReactContextBaseJavaModule implements LifecycleEventListener {
 
     public static final String TAG = "RNBoundary";
@@ -43,6 +44,11 @@ public class RNBoundaryModule extends ReactContextBaseJavaModule implements Life
         super(reactContext);
         this.mGeofencingClient = LocationServices.getGeofencingClient(getReactApplicationContext());
         getReactApplicationContext().addLifecycleEventListener(this);
+    }
+
+    @ReactMethod
+    public void setUpLocationManager(final Promise promise) {
+        // do nothing. This function is actually needed for iOS
     }
 
     @ReactMethod
