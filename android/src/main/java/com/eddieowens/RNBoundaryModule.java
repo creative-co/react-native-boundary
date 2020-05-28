@@ -48,7 +48,12 @@ public class RNBoundaryModule extends ReactContextBaseJavaModule implements Life
 
     @ReactMethod
     public void setUpLocationManager(final Promise promise) {
-        // do nothing. This function is actually needed for iOS
+        promise.resolve(null); // do nothing. This function is actually needed for iOS
+    }
+
+    @ReactMethod
+    public void requestStateForRegion(final ReadableMap readableMap, final Promise promise) {
+        promise.resolve(readableMap.getString("id"));
     }
 
     @ReactMethod
