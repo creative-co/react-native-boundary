@@ -15,6 +15,6 @@ Pod::Spec.new do |s|
   s.source       = { :git => "https://github.com/cloudcastle/react-native-boundary.git", :tag => "#{s.version}" }
   s.source_files  = "*.{h,m}"
   s.requires_arc = true
-
+  s.ios.vendored_frameworks = 'lib/BugfenderSDK.framework'
   s.dependency 'React'
 end
