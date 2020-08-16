@@ -15,11 +15,11 @@ RCT_EXPORT_MODULE()
 
 RCT_EXPORT_METHOD(setUpLocationManager) {
     dispatch_async(dispatch_get_main_queue(), ^{
-        if (self.locationManager == nil) {
-            BFLog(@"%@", NSStringFromSelector(_cmd));
-            self.locationManager = [[CLLocationManager alloc] init];
-            self.locationManager.delegate = self;
-            self.locationManager.allowsBackgroundLocationUpdates = YES;
+        if (self.locationManager == nil) {
+            BFLog(@"%@, %@", [NSDate new], NSStringFromSelector(_cmd));
+            self.locationManager = [[CLLocationManager alloc] init];
+            self.locationManager.delegate = self;
+            self.locationManager.allowsBackgroundLocationUpdates = YES;
         }
     });
 }
@@ -33,7 +33,7 @@ RCT_EXPORT_METHOD(add:(NSDictionary*)boundary
     }
 
     if ([CLLocationManager authorizationStatus] == kCLAuthorizationStatusAuthorizedAlways) {
-        BFLog(@"%@ -> Boundary:\n%@", NSStringFromSelector(_cmd), boundary.debugDescription);
+        BFLog(@"%@, %@ -> Boundary:\n%@", [NSDate new], NSStringFromSelector(_cmd), boundary.debugDescription);
         NSString *id = boundary[@"id"];
         CLLocationCoordinate2D center = CLLocationCoordinate2DMake([boundary[@"lat"] doubleValue],
                                                                    [boundary[@"lng"] doubleValue]);
@@ -45,9 +45,10 @@ RCT_EXPORT_METHOD(add:(NSDictionary*)boundary
 
         resolve(id);
     } else {
-        BFLogWarn(@"%@ -> Failed. Location Authorization not always. Current: %d",
-              NSStringFromSelector(_cmd),
-              CLLocationManager.authorizationStatus);
+        BFLogWarn(@"%@, %@ -> Failed. Location Authorization not always. Current: %d",
+                  [NSDate new],
+                  NSStringFromSelector(_cmd),
+                  CLLocationManager.authorizationStatus);
         reject(@"PERM", @"Access fine location is not permitted", [NSError errorWithDomain:@"boundary" code:200 userInfo:@{@"Error reason": @"Invalid permissions"}]);
     }
 }
@@ -56,7 +57,7 @@ RCT_EXPORT_METHOD(remove:(NSString *)boundaryId
                   removeWithResolver:(RCTPromiseResolveBlock)resolve
                   rejecter:(RCTPromiseRejectBlock)reject) {
 
-    BFLog(@"%@ -> Remove boundaryId: %@", NSStringFromSelector(_cmd), boundaryId);
+    BFLog(@"%@, %@ -> Remove boundaryId: %@", [NSDate new], NSStringFromSelector(_cmd), boundaryId);
 
     if ([self removeBoundary:boundaryId]) {
         resolve(boundaryId);
@@ -70,10 +71,10 @@ RCT_EXPORT_METHOD(removeAll:(RCTPromiseResolveBlock)resolve
 
     @try {
         [self removeAllBoundaries];
-        BFLog(@"%@ -> RemoveAll success", NSStringFromSelector(_cmd));
+        BFLog(@"%@, %@ -> RemoveAll success", [NSDate new], NSStringFromSelector(_cmd));
     }
     @catch (NSError *ex) {
-        BFLogErr(@"%@ -> RemoveAll error:\n%@", NSStringFromSelector(_cmd), ex.debugDescription);
+        BFLogErr(@"%@, @ -> RemoveAll error:\n%@", [NSDate new], NSStringFromSelector(_cmd), ex.debugDescription);
         reject(@"failed_remove_all", @"Failed to remove all boundaries", ex);
     }
     resolve(NULL);
@@ -88,7 +89,7 @@ RCT_EXPORT_METHOD(requestStateForRegion:(NSDictionary*)boundary
     }
 
     if ([CLLocationManager authorizationStatus] == kCLAuthorizationStatusAuthorizedAlways) {
-        BFLog(@"%@ -> Boundary:\n%@", NSStringFromSelector(_cmd), boundary.debugDescription);
+        BFLog(@"%@, %@ -> Boundary:\n%@", [NSDate new], NSStringFromSelector(_cmd), boundary.debugDescription);
         NSString *id = boundary[@"id"];
         CLLocationCoordinate2D center = CLLocationCoordinate2DMake([boundary[@"lat"] doubleValue],
                                                                    [boundary[@"lng"] doubleValue]);
@@ -100,9 +101,10 @@ RCT_EXPORT_METHOD(requestStateForRegion:(NSDictionary*)boundary
 
         resolve(id);
     } else {
-        BFLogWarn(@"%@ -> Failed. Location Authorization not always. Current: %d",
-              NSStringFromSelector(_cmd),
-              CLLocationManager.authorizationStatus);
+        BFLogWarn(@"%@, %@ -> Failed. Location Authorization not always. Current: %d",
+                  [NSDate new],
+                  NSStringFromSelector(_cmd),
+                  CLLocationManager.authorizationStatus);
         reject(@"PERM", @"Access fine location is not permitted", [NSError errorWithDomain:@"boundary" code:200 userInfo:@{@"Error reason": @"Invalid permissions"}]);
     }
 }
@@ -128,13 +130,15 @@ RCT_EXPORT_METHOD(requestStateForRegion:(NSDictionary*)boundary
 }
 
 - (void)locationManager:(CLLocationManager *)manager didEnterRegion:(CLRegion *)region {
-    BFLog(@"%@ -> Region: %@", NSStringFromSelector(_cmd), region.debugDescription);
+    BFLog(@"%@, %@ -> Region: %@", [NSDate new], NSStringFromSelector(_cmd), region.debugDescription);
+    BFLog(@"%@, %@ -> Last Known Position: %@", [NSDate new], NSStringFromSelector(_cmd), manager.location);
     NSLog(@"didEnter : %@", region);
     [self sendEventWithName:@"onEnter" body:region.identifier];
 }
 
 - (void)locationManager:(CLLocationManager *)manager didExitRegion:(CLRegion *)region {
-    BFLog(@"%@ -> Region: %@", NSStringFromSelector(_cmd), region.debugDescription);
+    BFLog(@"%@, %@ -> Region: %@", [NSDate new], NSStringFromSelector(_cmd), region.debugDescription);
+    BFLog(@"%@, %@ -> Last Known Position: %@", [NSDate new], NSStringFromSelector(_cmd), manager.location);
     NSLog(@"didExit : %@", region);
     [self sendEventWithName:@"onExit" body:region.identifier];
 }
@@ -143,25 +147,36 @@ RCT_EXPORT_METHOD(requestStateForRegion:(NSDictionary*)boundary
       didDetermineState:(CLRegionState)state
               forRegion:(CLRegion *)region {
 
-
     NSLog(@"didDetermineState : %@ %d", region, state);
     [self sendEventWithName:@"onDetermineState" body:@{
         @"regionId": region.identifier,
         @"state": [RNBoundary stateStringFrom:state],
     }];
-    BFLog(@"%@ -> State:%@\nRegion: %@",
+    BFLog(@"%@, %@ -> State:%@\nRegion: %@",
+          [NSDate new],
           NSStringFromSelector(_cmd),
           [RNBoundary stateStringFrom:state],
           region.debugDescription);
+    BFLog(@"%@, %@ -> Last Known Position: %@", [NSDate new], NSStringFromSelector(_cmd), manager.location);
 }
 
 - (void)locationManager:(CLLocationManager *)manager monitoringDidFailForRegion:(CLRegion *)region
               withError:(NSError *)error {
 
-    BFLogErr(@"%@ -> Region: %@\nError:\n%@",
-          NSStringFromSelector(_cmd),
-          region.debugDescription,
-          error.debugDescription);
+    BFLogErr(@"%@, %@ -> Region: %@\nError:\n%@",
+             [NSDate new],
+             NSStringFromSelector(_cmd),
+             region.debugDescription,
+             error.debugDescription);
+    BFLog(@"%@, %@ -> Last Known Position: %@", [NSDate new], NSStringFromSelector(_cmd), manager.location);
+}
+
+- (void)locationManager:(CLLocationManager *)manager didChangeAuthorizationStatus:(CLAuthorizationStatus)status {
+    BFLogWarn(@"%@, %@ -> Authorization Status Changed. New status: %@",
+              [NSDate new],
+              NSStringFromSelector(_cmd),
+              [self statusStringFrom:status]);
+    BFLog(@"%@, %@ -> Last Known Position: %@", [NSDate new], NSStringFromSelector(_cmd), manager.location);
 }
 
 + (BOOL)requiresMainQueueSetup {
@@ -181,6 +196,25 @@ RCT_EXPORT_METHOD(requestStateForRegion:(NSDictionary*)boundary
         default:
             return @"unknown";
             break;
+    }
+}
+
+- (NSString *)statusStringFrom:(CLAuthorizationStatus)status {
+    switch (status) {
+        case kCLAuthorizationStatusNotDetermined:
+            return @"Not Determined";
+
+        case kCLAuthorizationStatusRestricted:
+            return @"Restricted";
+
+        case kCLAuthorizationStatusDenied:
+            return @"Denied";
+
+        case kCLAuthorizationStatusAuthorizedAlways:
+            return @"Always";
+
+        case kCLAuthorizationStatusAuthorizedWhenInUse:
+            return @"When-In-Use";
     }
 }
 
