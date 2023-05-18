@@ -1,9 +1,11 @@
 package com.eddieowens;
 
 import android.Manifest;
+import android.app.Activity;
 import android.app.PendingIntent;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.os.Build;
 import android.util.Log;
 
 import com.eddieowens.receivers.BoundaryEventBroadcastReceiver;
@@ -146,8 +148,8 @@ public class RNBoundaryModule extends ReactContextBaseJavaModule implements Life
             return mBoundaryPendingIntent;
         }
         Intent intent = new Intent(getReactApplicationContext(), BoundaryEventBroadcastReceiver.class);
-        mBoundaryPendingIntent = PendingIntent.getBroadcast(getReactApplicationContext(), 0, intent, PendingIntent.
-                FLAG_UPDATE_CURRENT);
+        mBoundaryPendingIntent = PendingIntent.getBroadcast(getReactApplicationContext(), 0, intent,
+                PendingIntent.FLAG_UPDATE_CURRENT | (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M ? PendingIntent.FLAG_IMMUTABLE : 0));
         return mBoundaryPendingIntent;
     }
 
@@ -237,12 +239,15 @@ public class RNBoundaryModule extends ReactContextBaseJavaModule implements Life
     }
 
     private int requestPermissions() {
-        ActivityCompat.requestPermissions(getReactApplicationContext().getCurrentActivity(),
-                new String[]{
-                        Manifest.permission.ACCESS_FINE_LOCATION,
-                        Manifest.permission.ACCESS_COARSE_LOCATION
-                }, 1);
 
+        Activity activity = getReactApplicationContext().getCurrentActivity();
+        if (activity != null) {
+            ActivityCompat.requestPermissions(activity,
+                    new String[] {
+                            Manifest.permission.ACCESS_FINE_LOCATION,
+                            Manifest.permission.ACCESS_COARSE_LOCATION
+                    }, 1);
+        }
         return ActivityCompat.checkSelfPermission(getReactApplicationContext(), Manifest.permission.ACCESS_FINE_LOCATION);
     }
 
